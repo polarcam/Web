@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head xmlns:th="http://www.thymeleaf.org">
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="/css/bootstrap.css">
+    <script src="/js/jquery-3.6.1.min.js"></script>
+    <link rel="stylesheet" href="/plugins/bootstraptable/bootstrap-table.min.css">
+
+
+
+</head>
+<body>
+
+<div class = "container-fluid">
+    <table class="table table-striped" id = "stuTable">
+    </table>
+
+    <form id="searchForm">
+        <div class="input-group mb-3">
+            <select class="form-select" id="searchMatching" name="searchMatching">
+                <option value = "20">模糊查询</option>
+                <option value = "21">精确查询</option>
+            </select>
+            <select class="form-select" id="searchOption" name="searchOption">
+                <option value = "10">以课号查询课程</option>
+                <option value = "11">以课名查询课程</option>
+                <option value = "12">以课时查询课程</option>
+                <option value = "13">以成绩查询课程</option>
+                <option value = "15">以学分查询课程</option>
+            </select>
+            <input name="name" id="name" type="text" placeholder="请输入" class="w-50 form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+            <button type="button" class="btn btn-outline-secondary" onclick="searchStudent();"> 查询 </button>
+        </div>
+    </form>
+
+    <table class="table table-dark table-striped" id="studentTb2">
+
+    </table>
+
+</div>
+
+
+
+<script src="/js/bootstrap.min.js"></script>
+
+<script src="/plugins/bootstraptable/bootstrap-table.min.js"></script>
+<script src="/plugins/bootstraptable/locale/bootstrap-table-zh-CN.min.js"></script>
+
+<script type="text/javascript">
+    function search(){
+
+        $('#stuTable').bootstrapTable("destroy");
+        loadTable();
+    }
+
+    function searchStudent(){
+
+        $('#studentTb2').bootstrapTable("destroy");
+
+        var searchOption = $("#searchOption").val();
+
+        var name = $("#name").val();
+
+        var searchMatching = $("#searchMatching").val();
+
+        $("#studentTb2").bootstrapTable({
+            url: '/student/search',
+            striped: true, //隔行变色
+            pagination: true, //底部显示分页条
+            singleSelect: false, //禁止多选
+            pageSize:4, //每一页有几条数据
+            pageNumber:1, //设置了分页，首页页码
+            sidePagination: "server", //设置在何处分页，可选值为client或者server
+            queryParams: function (params){
+                var paraObj = {
+                    size: params.limit,
+                    page:params.offset/params.limit,
+                    sort:"id",
+                    direct:"asc",
+                    pageNum:this.pageNumber,
+                    name:name+"!"+searchOption+"!"+searchMatching,
+                };
+                return paraObj;
+            },
+            columns: [{
+                field: 'id',
+                title: '序号',
+                width: 50
+            }, {
+                field: 'cno',
+                title: '课号',
+                width: 130
+            }, {
+                field: 'cname',
+                title: '课名',
+                width: 100
+            }, {
+                field: 'hour',
+                title: '课时',
+                width: 30
+            }, {
+                field: 'credit',
+                title: '学分',
+                width: 10,
+            }, {
+                field: 'score',
+                title: '分数',
+                width: 50,
+                formatter:ifNull
+            }],
+        })
+    }
+
+
+    function loadTable(){
+
+        $('#stuTable').bootstrapTable({
+            url: '/student/displayList',
+            striped: true, //隔行变色
+            pagination: true, //底部显示分页条
+            singleSelect: false, //禁止多选
+            pageSize:5, //每一页有几条数据
+            pageNumber:1, //设置了分页，首页页码
+            sidePagination: "server", //设置在何处分页，可选值为client或者server
+            queryParams: function (params){
+                var paraObj = {
+                    size: params.limit,
+                    page:params.offset/params.limit,
+                    sort:"id",
+                    direct:"desc",
+                    pageNum:this.pageNumber,
+                };
+                return paraObj;
+            },
+            columns: [{
+                field: 'id',
+                title: '序号',
+                width: 50
+            }, {
+                field: 'cno',
+                title: '课号',
+                width: 130
+            }, {
+                field: 'cname',
+                title: '课名',
+                width: 100
+            }, {
+                field: 'hour',
+                title: '课时',
+                width: 30
+            }, {
+                field: 'credit',
+                title: '学分',
+                width: 10,
+            }, {
+                field: 'score',
+                title: '分数',
+                width: 50,
+                formatter:ifNull
+            }],
+        })
+
+    }
+    function ifNull(value){
+        if (value == null)
+            return "暂无";
+        else {
+            return value;
+        }
+    }
+    function login_jump(){
+        $.ajax({
+            url:'/student/displayList'
+        }).done(function(rs){
+            if(rs==null){
+                window.location.href="/login";
+            }
+        })
+    }
+    $(function (){
+        login_jump();
+        loadTable();
+    });
+
+</script>
+
+
+</body>
+</html>

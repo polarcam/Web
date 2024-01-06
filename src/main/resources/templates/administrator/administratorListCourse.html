@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head xmlns:th="http://www.thymeleaf.org">
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="/css/bootstrap.css">
+    <script src="/js/jquery-3.6.1.min.js"></script>
+    <link rel="stylesheet" href="/plugins/bootstraptable/bootstrap-table.min.css">
+
+
+
+</head>
+<body>
+
+<div class = "container-fluid">
+    <table class="table table-striped" id = "stuTable">
+    </table>
+
+    <form id="searchForm">
+        <div class="input-group mb-3">
+            <select class="form-select" id="searchMatching" name="searchMatching">
+                <option value = "21">精确查询</option>
+                <option value = "20">模糊查询</option>
+            </select>
+            <select class="form-select" id="searchOption" name="searchOption">
+                <option value = "10">以课号查询</option>
+                <option value = "11">以课名查询</option>>
+                <option value = "12">以课时查询</option>
+                <option value = "13">以学分查询</option>
+            </select>
+            <input name="name" id="name" type="text" placeholder="请输入" class="w-50 form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+            <button type="button" class="btn btn-outline-secondary" onclick="searchCourse();"> 查询 </button>
+        </div>
+    </form>
+
+    <table class="table table-dark table-striped" id="studentTb2">
+
+    </table>
+
+</div>
+
+
+
+<script src="/js/bootstrap.min.js"></script>
+
+<script src="/plugins/bootstraptable/bootstrap-table.min.js"></script>
+<script src="/plugins/bootstraptable/locale/bootstrap-table-zh-CN.min.js"></script>
+
+<script type="text/javascript">
+    function search(){
+
+        $('#stuTable').bootstrapTable("destroy");
+        loadTable();
+    }
+
+    function searchCourse(){
+
+        $('#studentTb2').bootstrapTable("destroy");
+
+        var searchOption = $("#searchOption").val();
+
+        var name = $("#name").val();
+
+        var searchMatching = $("#searchMatching").val();
+
+        $("#studentTb2").bootstrapTable({
+            url: '/administrator/searchCourse',
+            striped: true, //隔行变色
+            pagination: true, //底部显示分页条
+            singleSelect: false, //禁止多选
+            pageSize:4, //每一页有几条数据
+            pageNumber:1, //设置了分页，首页页码
+            sidePagination: "server", //设置在何处分页，可选值为client或者server
+            queryParams: function (params){
+                var paraObj = {
+                    size: params.limit,
+                    page:params.offset/params.limit,
+                    sort:"id",
+                    direct:"asc",
+                    pageNum:this.pageNumber,
+                    name:name+"!"+searchOption+"!"+searchMatching,
+                };
+                return paraObj;
+            },
+            columns: [{
+                field: 'id',
+                title: '序号',
+                width: 50
+            }, {
+                field: 'cno',
+                title: '课号',
+                width: 130
+            }, {
+                field: 'cname',
+                title: '课名',
+                width: 100
+            }, {
+                field: 'hour',
+                title: '课时',
+                width: 30
+            }, {
+                field: 'credit',
+                title: '学分',
+                width: 10,
+            }, {
+                field: 'cno',
+                title: '处理',
+                width: 50,
+                formatter:chuLiFormatterCourse
+            }],
+            responseHandler: function (res){
+                console.log(res);
+                return {
+                    "total":res.data.total,
+                    "rows":res.data.rows
+                };
+            },
+        })
+    }
+
+
+    function loadTable(){
+
+        $('#stuTable').bootstrapTable({
+            url: '/administrator/displayListCourse',
+            striped: true, //隔行变色
+            pagination: true, //底部显示分页条
+            singleSelect: false, //禁止多选
+            pageSize:5, //每一页有几条数据
+            pageNumber:1, //设置了分页，首页页码
+            sidePagination: "server", //设置在何处分页，可选值为client或者server
+            queryParams: function (params){
+                var paraObj = {
+                    size: params.limit,
+                    page:params.offset/params.limit,
+                    sort:"id",
+                    direct:"desc",
+                    pageNum:this.pageNumber,
+                };
+                return paraObj;
+            },
+            columns: [{
+                field: 'id',
+                title: '序号',
+                width: 50
+            }, {
+                field: 'cno',
+                title: '课号',
+                width: 130
+            }, {
+                field: 'cname',
+                title: '课名',
+                width: 100
+            }, {
+                field: 'hour',
+                title: '课时',
+                width: 30
+            }, {
+                field: 'credit',
+                title: '学分',
+                width: 10,
+            }, {
+                field: 'cno',
+                title: '处理',
+                width: 50,
+                formatter:chuLiFormatterCourse
+            }],
+            responseHandler: function (res){
+                console.log(res);
+                return {
+                    "total":res.data.total,
+                    "rows":res.data.rows
+                };
+            },
+        })
+
+    }
+    function chuLiFormatterCourse(value){
+        return "<a href='#' onclick='editCourse("+value+");'><svg t=\"1669346586366\" class=\"icon\" viewBox=\"0 0 1024 1024\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" p-id=\"1475\" width=\"20\" height=\"20\"><path d=\"M618.666667 288a32 32 0 0 1 0 64H320a32 32 0 0 1 0-64h298.666667zM704 480a32 32 0 0 1 0 64H320a32 32 0 0 1 0-64h384zM533.333333 672a32 32 0 0 1 0 64H320a32 32 0 0 1 0-64h213.333333z\" fill=\"#1296db\" p-id=\"1476\"></path><path d=\"M768 85.333333a128 128 0 0 1 128 128v597.333334a128 128 0 0 1-128 128H256a128 128 0 0 1-128-128V213.333333a128 128 0 0 1 128-128h512z m0 64H256a64 64 0 0 0-64 64v597.333334a64 64 0 0 0 64 64h512a64 64 0 0 0 64-64V213.333333a64 64 0 0 0-64-64z\" fill=\"#1296db\" p-id=\"1477\"></path></svg></a>  <a href='#'  onclick='deleteCourse("
+            +value+")'><svg t=\"1669346507054\" class=\"icon\" viewBox=\"0 0 1024 1024\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" p-id=\"1018\" width=\"20\" height=\"20\"><path d=\"M0 0h1024v1024H0z\" fill=\"#d4237a\" fill-opacity=\"0\" p-id=\"1019\"></path><path d=\"M240.448 168l2.346667 2.154667 289.92 289.941333 279.253333-279.253333a42.666667 42.666667 0 0 1 62.506667 58.026666l-2.133334 2.346667-279.296 279.210667 279.274667 279.253333a42.666667 42.666667 0 0 1-58.005333 62.528l-2.346667-2.176-279.253333-279.253333-289.92 289.962666a42.666667 42.666667 0 0 1-62.506667-58.005333l2.154667-2.346667 289.941333-289.962666-289.92-289.92a42.666667 42.666667 0 0 1 57.984-62.506667z\" fill=\"#d4237a\" p-id=\"1020\"></path></svg></a>"
+    }
+
+    function editCourse(tno){
+        $("#exampleModalCourse").modal('show')
+
+        $.ajax({
+            url:'/administrator/getCourse/'+tno
+        }).done(function(rs){
+            $("#idCourse").val(rs.id);
+            $("#cname").val(rs.cname);
+            $("#cno").val(rs.cno);
+            $("#hour").val(rs.hour);
+            $("#credit").val(rs.credit);
+        })
+    }
+
+    function saveCourse(){
+        var data = $("#formCourse").serialize();
+        var id = $("#idCourse").val();
+
+        if (id < 1){
+            $.ajax({
+                url:'/administrator/insertCourse',
+                method:"POST",
+                data:data
+            }).done(function (){
+                $("#studentTb2").bootstrapTable("destroy");
+                $("#stuTable").bootstrapTable("destroy");
+                loadTable();
+                search();
+                $("#exampleModalCourse").modal('hide');
+            })
+        } else {
+            $.ajax({
+                url:'/administrator/updateCourse',
+                method:"PUT",
+                data:data
+            }).done(function(){
+                $("#studentTb2").bootstrapTable("destroy");
+                $("#stuTable").bootstrapTable("destroy");
+                loadTable();
+                search();
+                $("#exampleModalCourse").modal('hide');
+            })
+        }
+    }
+
+    function deleteCourse(tno){
+
+        if(confirm("确认删除?")){
+            $.ajax({
+                url:"/administrator/deleteCourse/"+tno,
+                method:"DELETE"
+            }).done(function (){
+                $('#stuTable').bootstrapTable("destroy");
+                loadTable();
+                searchCourse();
+            });
+        }
+
+    }
+
+    function preAddCourse(){
+        $("#cname").val("");
+        $("#cno").val("");
+        $("#hour").val("");
+        $("#credit").val("");
+        $("#idCourse").val(0);
+    }
+
+    function login_jump(){
+        $.ajax({
+            url:'/administrator/displayListCourse'
+        }).done(function(rs){
+            if(rs==null){
+                window.location.href="/login";
+            }
+        })
+    }
+    $(function (){
+        login_jump();
+        loadTable();
+    });
+
+</script>
+<div style="right: 50px;width: 300px">
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModalCourse" onclick="preAddCourse();">
+        新增课程
+    </button>
+</div>
+<div class="modal fade" id="exampleModalCourse" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">编辑课程信息</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!--模态框内容-->
+                <form id="formCourse">
+                    <input  hidden="hidden" id="idCourse" name="id"/>
+                    <div class="mb-3">
+                        <label class="form-label">课号:</label>
+                        <input type="text" class="form-control" id="cno" name="cno">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">课名：</label>
+                        <input type="text" class="form-control" id="cname" name="cname">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">学时：</label>
+                        <input type="text" class="form-control" id="hour" name="hour">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">学分:</label>
+                        <input type="text" class="form-control" id="credit" name="credit">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+
+                <button type="button" class="btn btn-primary" onclick="saveCourse();">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
